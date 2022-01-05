@@ -1,44 +1,43 @@
 const GAME = {
     ctx: null,
+    blocksCoor: [],
+    level1: {
+        rows: 6,
+        cols: 12
+    },
     sprites: {
         background: {
             src: 'background.png',
             x: 0,
             y: 0,
+            img: null
         },
         ball: {
             src: 'ball.png',
-            x: 320,
-            y: 280,
-            frame: 1
+            x: 450,
+            y: 571,
+            img: null
+
         },
         platform: {
             src: 'platform.png',
-            x: 300,
-            y: 300
+            x: 400,
+            y: 600,
+            img: null
 
-        }
+        },
+        block: {
+            src: 'block.png',
+            x: 0,
+            y: 0,
+            img: null
+        },
+
     },
 
     init() {
         this.ctx = document.querySelector('#canvasGame').getContext('2d');
     },
-
-
-    async preload() {
-        for (const Key in this.sprites) {
-            const {src, x, y} = this.sprites[Key];
-            const img = this.creatImg(src);
-            const promiseImg = new Promise((resolve) => {
-                img.addEventListener('load', () => {
-                    this.renderCanvas(img, x, y);
-                    resolve();
-                });
-            });
-            await promiseImg;
-        }
-    },
-
 
     creatImg(src) {
         const img = new Image();
@@ -46,18 +45,62 @@ const GAME = {
         return img;
     },
 
+    preload(fun) {
+        let loaded = 0;
+        const required = Object.keys(this.sprites).length;
+        const renderCanvas = () => {
+            loaded++;
+            if (loaded >= required) {
+                fun();
+            }
+        };
 
-    renderCanvas(element, x, y) {
+        for (const Key in this.sprites) {
+            const {src} = this.sprites[Key];
+            const img = this.creatImg(src);
+            this.sprites[Key]['img'] = img;
+            img.addEventListener('load', renderCanvas);
+        }
+    },
+
+    run() {
         window.requestAnimationFrame(() => {
-            this.ctx.drawImage(element, x, y);
+            this.render();
+        })
+    },
 
-        });
+    render() {
+        for (const Key in this.sprites) {
+            const {img, x, y} = this.sprites[Key];
+            if (Key === 'block') {
+                for (const coordinates of this.blocksCoor) {
+                    this.ctx.drawImage(img, coordinates.x, coordinates.y);
+                }
+            } else {
+                this.ctx.drawImage(img, x, y);
+            }
+
+        }
+    },
+
+    createBlocksCoor(level) {
+        for (let row = 0; row < level.rows; row++) {
+            for (let col = 0; col < level.cols; col++) {
+                this.blocksCoor.push({
+                    x: 84 * col,
+                    y: 29 * row + 50,
+                });
+            }
+        }
 
     },
 
     startGame() {
         this.init();
-        this.preload();
+        this.preload(() => {
+            this.createBlocksCoor(this.level1);
+            this.run();
+        });
 
     }
 }
@@ -67,13 +110,4 @@ window.addEventListener('load', () => {
 });
 
 
-async function test() {
-    const promiseT = new Promise((res, rej) => {
-        setTimeout(() => res(2), 1000);
-    });
-    const answer = await promiseT;
 
-    console.log(answer);
-
-
-}
