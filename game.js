@@ -10,27 +10,31 @@ const GAME = {
             src: 'background.png',
             x: 0,
             y: 0,
-            img: null
+            img: null,
+            single: true
         },
         ball: {
             src: 'ball.png',
             x: 450,
             y: 571,
-            img: null
+            img: null,
+            single: true
 
         },
         platform: {
             src: 'platform.png',
             x: 400,
             y: 600,
-            img: null
+            img: null,
+            single: true
 
         },
         block: {
             src: 'block.png',
             x: 0,
             y: 0,
-            img: null
+            img: null,
+            single: false
         },
 
     },
@@ -71,15 +75,18 @@ const GAME = {
 
     render() {
         for (const Key in this.sprites) {
-            const {img, x, y} = this.sprites[Key];
-            if (Key === 'block') {
-                for (const coordinates of this.blocksCoor) {
-                    this.ctx.drawImage(img, coordinates.x, coordinates.y);
-                }
-            } else {
+            const {img, x, y, single} = this.sprites[Key];
+            if (single) {
                 this.ctx.drawImage(img, x, y);
             }
+        }
+        this.renderBlocks();
+    },
 
+    renderBlocks() {
+        const img = this.sprites.block.img;
+        for (const coordinates of this.blocksCoor) {
+            this.ctx.drawImage(img, coordinates.x, coordinates.y);
         }
     },
 
@@ -104,6 +111,7 @@ const GAME = {
 
     }
 }
+
 
 window.addEventListener('load', () => {
     GAME.startGame();
