@@ -25,6 +25,8 @@ const GAME = {
             src: 'platform.png',
             x: 400,
             y: 600,
+            velocity: 6,
+            step: 100,
             img: null,
             single: true
 
@@ -41,6 +43,33 @@ const GAME = {
 
     init() {
         this.ctx = document.querySelector('#canvasGame').getContext('2d');
+        this.setEvent();
+
+    },
+
+    test() {
+
+        this.run();
+    },
+
+    movePlatform(keyCode) {
+        const {platform} = this.sprites;
+        if (keyCode === 37) {
+            console.log('move left');
+            platform.x -= 100;
+        } else if (keyCode === 39) {
+            console.log('move right');
+            platform.x += 100;
+        }
+        requestAnimationFrame()
+
+    },
+
+    setEvent() {
+        window.addEventListener('keydown', event => {
+            this.movePlatform(event.keyCode);
+        });
+
     },
 
     creatImg(src) {
