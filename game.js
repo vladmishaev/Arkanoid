@@ -1,6 +1,14 @@
+const KEYS = {
+    LEFT: 37,
+    RIGHT: 39
+}
+
 const GAME = {
     ctx: null,
     blocksCoor: [],
+    ball: null,
+    platform: null,
+    block: null,
     level1: {
         rows: 6,
         cols: 12
@@ -8,40 +16,19 @@ const GAME = {
     sprites: {
         background: {
             src: 'background.png',
-            x: 0,
-            y: 0,
             img: null,
-            single: true
         },
         ball: {
             src: 'ball.png',
-            x: 450,
-            y: 571,
             img: null,
-            single: true
-
         },
         platform: {
             src: 'platform.png',
-            x: 400,
-            y: 600,
-            velocity: 6,
-            dx: 0,
             img: null,
-            single: true,
-            move() {
-                if (this.dx) {
-                    this.x += this.dx;
-                }
-            }
-
         },
         block: {
             src: 'block.png',
-            x: 0,
-            y: 0,
             img: null,
-            single: false
         },
 
     },
@@ -51,17 +38,14 @@ const GAME = {
         this.setEvents();
     },
     setEvents() {
-        const {platform} = this.sprites;
-
         window.addEventListener('keydown', event => {
-            if (event.keyCode === 37) {
-                platform.dx = -platform.velocity;
-            } else if (event.keyCode === 39) {
-                platform.dx = platform.velocity;
+            if (event.keyCode === KEYS.LEFT || event.keyCode === KEYS.RIGHT) {
+                this.platform.start(event.keyCode);
             }
+
         });
         window.addEventListener('keyup', event => {
-            platform.dx = 0;
+            this.platform.stop();
         });
     },
     creatImg(src) {
@@ -88,7 +72,7 @@ const GAME = {
         }
     },
     update() {
-        this.sprites.platform.move();
+        this.platform.move();
     },
 
     run() {
@@ -100,12 +84,9 @@ const GAME = {
     },
 
     render() {
-        for (const Key in this.sprites) {
-            const {img, x, y, single} = this.sprites[Key];
-            if (single) {
-                this.ctx.drawImage(img, x, y);
-            }
-        }
+        this.ctx.drawImage(this.sprites.background.img, 0, 0);
+        this.ctx.drawImage(this.sprites.ball.img, this.ball.x, this.ball.y);
+        this.ctx.drawImage(this.sprites.platform.img, this.platform.x, this.platform.y);
         this.renderBlocks();
     },
 
@@ -121,7 +102,7 @@ const GAME = {
             for (let col = 0; col < level.cols; col++) {
                 this.blocksCoor.push({
                     x: 84 * col,
-                    y: 29 * row + 50,
+                    y: 29 * row + this.block.y,
                 });
             }
         }
@@ -137,6 +118,42 @@ const GAME = {
 
     }
 }
+
+GAME.ball = {
+    x: 450,
+    y: 571,
+    single: true
+
+};
+
+GAME.platform = {
+    x: 400,
+    y: 600,
+    velocity: 6,
+    dx: 0,
+    move() {
+        if (this.dx) {
+            this.x += this.dx;
+            GAME.ball.x += this.dx;
+        }
+    },
+    start(direction) {
+        if (direction === KEYS.LEFT) {
+            this.dx = -this.velocity;
+        } else if (direction === KEYS.RIGHT) {
+            this.dx = this.velocity;
+        }
+    },
+    stop() {
+        this.dx = 0;
+    }
+
+};
+
+GAME.block = {
+    x: 0,
+    y: 50,
+};
 
 
 window.addEventListener('load', () => {
