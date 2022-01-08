@@ -26,9 +26,14 @@ const GAME = {
             x: 400,
             y: 600,
             velocity: 6,
-            step: 100,
+            dx: 0,
             img: null,
-            single: true
+            single: true,
+            move() {
+                if (this.dx) {
+                    this.x += this.dx;
+                }
+            }
 
         },
         block: {
@@ -43,35 +48,22 @@ const GAME = {
 
     init() {
         this.ctx = document.querySelector('#canvasGame').getContext('2d');
-        this.setEvent();
-
+        this.setEvents();
     },
-
-    test() {
-
-        this.run();
-    },
-
-    movePlatform(keyCode) {
+    setEvents() {
         const {platform} = this.sprites;
-        if (keyCode === 37) {
-            console.log('move left');
-            platform.x -= 100;
-        } else if (keyCode === 39) {
-            console.log('move right');
-            platform.x += 100;
-        }
-        requestAnimationFrame()
 
-    },
-
-    setEvent() {
         window.addEventListener('keydown', event => {
-            this.movePlatform(event.keyCode);
+            if (event.keyCode === 37) {
+                platform.dx = -platform.velocity;
+            } else if (event.keyCode === 39) {
+                platform.dx = platform.velocity;
+            }
         });
-
+        window.addEventListener('keyup', event => {
+            platform.dx = 0;
+        });
     },
-
     creatImg(src) {
         const img = new Image();
         img.src = `img/${src}`;
@@ -95,10 +87,15 @@ const GAME = {
             img.addEventListener('load', renderCanvas);
         }
     },
+    update() {
+        this.sprites.platform.move();
+    },
 
     run() {
         window.requestAnimationFrame(() => {
+            this.update();
             this.render();
+            this.run();
         })
     },
 
