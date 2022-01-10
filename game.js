@@ -72,12 +72,18 @@ const GAME = {
             const {src} = this.sprites[Key];
             const img = this.creatImg(src);
             this.sprites[Key]['img'] = img;
+
             img.addEventListener('load', renderCanvas);
         }
     },
     update() {
         this.platform.move();
         this.ball.move();
+        for (const block of this.blocksCoor) {
+            if (this.ball.collide(block)) {
+                this.ball.bumpBlock(block);
+            }
+        }
 
     },
 
@@ -108,6 +114,8 @@ const GAME = {
         for (let row = 0; row < level.rows; row++) {
             for (let col = 0; col < level.cols; col++) {
                 this.blocksCoor.push({
+                    width: 84,
+                    height: 29,
                     x: 84 * col,
                     y: 29 * row + this.block.y,
                 });
@@ -133,17 +141,35 @@ GAME.ball = {
     velocity: 4,
     dy: 0,
     dx: 0,
+    width: 33,
+    height: 29,
     x: 450,
     y: 571,
     single: true,
     start() {
         this.dy = -this.velocity;
-        this.dx =  GAME.random(-this.velocity, this.velocity);
+        this.dx = GAME.random(-this.velocity, this.velocity);
+    },
+    bumpBlock(block) {
+        this.dy *= -1;
     },
     move() {
         this.y += this.dy;
         this.x += this.dx;
     },
+    collide(block) {
+        const x = this.x + this.dx;
+        const y = this.y + this.dy;
+        if (x + this.width > block.x &&
+            x < block.x + block.width &&
+            y + this.height > block.y &&
+            y < block.y + block.height) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
 
 };
 
@@ -183,6 +209,8 @@ GAME.platform = {
 };
 
 GAME.block = {
+    width: 84,
+    height: 29,
     x: 0,
     y: 50,
 };
