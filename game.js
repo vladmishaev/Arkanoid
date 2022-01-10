@@ -40,11 +40,10 @@ const GAME = {
     },
     setEvents() {
         window.addEventListener('keydown', event => {
-            console.log(event.keyCode);
             if (event.keyCode === KEYS.LEFT || event.keyCode === KEYS.RIGHT) {
                 this.platform.start(event.keyCode);
-            }else if(event.keyCode === KEYS.SPACE){
-                this.ball.start();
+            } else if (event.keyCode === KEYS.SPACE) {
+                this.platform.fire();
             }
 
         });
@@ -131,12 +130,12 @@ GAME.ball = {
     x: 450,
     y: 571,
     single: true,
-    start(){
+    start() {
         this.dy = -this.velocity;
     },
     move() {
         this.y += this.dy;
-        },
+    },
 
 };
 
@@ -144,12 +143,22 @@ GAME.platform = {
     x: 400,
     y: 600,
     velocity: 6,
-    ball:GAME.ball,
+    ball: GAME.ball,
     dx: 0,
+    fire() {
+        if (this.ball !== null) {
+            this.ball.start();
+            this.ball = null;
+        }
+
+    },
     move() {
         if (this.dx) {
             this.x += this.dx;
-            this.ball.x += this.dx;
+            if (this.ball !== null) {
+                this.ball.x += this.dx;
+            }
+
         }
     },
     start(direction) {
