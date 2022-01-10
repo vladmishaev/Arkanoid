@@ -35,7 +35,8 @@ const GAME = {
     },
 
     init() {
-        this.ctx = document.querySelector('#canvasGame').getContext('2d');
+        this.canvas = document.querySelector('#canvasGame');
+        this.ctx = this.canvas.getContext('2d');
         this.setEvents();
     },
     setEvents() {
@@ -89,6 +90,7 @@ const GAME = {
     },
 
     render() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.drawImage(this.sprites.background.img, 0, 0);
         this.ctx.drawImage(this.sprites.ball.img, this.ball.x, this.ball.y);
         this.ctx.drawImage(this.sprites.platform.img, this.platform.x, this.platform.y);
@@ -121,20 +123,26 @@ const GAME = {
             this.run();
         });
 
+    },
+    random(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
     }
 }
 
 GAME.ball = {
     velocity: 4,
     dy: 0,
+    dx: 0,
     x: 450,
     y: 571,
     single: true,
     start() {
         this.dy = -this.velocity;
+        this.dx =  GAME.random(-this.velocity, this.velocity);
     },
     move() {
         this.y += this.dy;
+        this.x += this.dx;
     },
 
 };
