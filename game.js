@@ -90,7 +90,7 @@ const GAME = {
     },
     collideBlock() {
         for (const block of this.blocksCoor) {
-            if (this.ball.collide(block)) {
+            if (block.active && this.ball.collide(block)) {
                 this.ball.bumpBlock(block);
             }
         }
@@ -115,7 +115,9 @@ const GAME = {
     renderBlocks() {
         const img = this.sprites.block.img;
         for (const coordinates of this.blocksCoor) {
-            this.ctx.drawImage(img, coordinates.x, coordinates.y);
+            if (coordinates.active) {
+                this.ctx.drawImage(img, coordinates.x, coordinates.y);
+            }
         }
     },
 
@@ -125,6 +127,7 @@ const GAME = {
                 this.blocksCoor.push({
                     width: 84,
                     height: 29,
+                    active: true,
                     x: 84 * col,
                     y: 29 * row + this.block.y,
                 });
@@ -161,6 +164,7 @@ GAME.ball = {
     },
     bumpBlock(block) {
         this.dy *= -1;
+        block.active = false;
     },
     move() {
         this.y += this.dy;
