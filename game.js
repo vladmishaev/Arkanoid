@@ -35,7 +35,8 @@ const GAME = {
     },
 
     init() {
-        this.ctx = document.querySelector('#canvasGame').getContext('2d');
+        this.canvas = document.querySelector('#canvasGame');
+        this.ctx = this.canvas.getContext('2d');
         this.setEvents();
     },
     setEvents() {
@@ -71,13 +72,28 @@ const GAME = {
             const {src} = this.sprites[Key];
             const img = this.creatImg(src);
             this.sprites[Key]['img'] = img;
+
             img.addEventListener('load', renderCanvas);
         }
     },
     update() {
         this.platform.move();
         this.ball.move();
+        this.collidePlatform();
+        this.collideBlock();
 
+    },
+    collidePlatform() {
+        if (this.ball.collide(this.platform)) {
+            this.ball.bumpPlatform(this.platform);
+        }
+    },
+    collideBlock() {
+        for (const block of this.blocksCoor) {
+            if (this.ball.collide(block)) {
+                this.ball.bumpBlock(block);
+            }
+        }
     },
 
     run() {
@@ -89,6 +105,7 @@ const GAME = {
     },
 
     render() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.drawImage(this.sprites.background.img, 0, 0);
         this.ctx.drawImage(this.sprites.ball.img, this.ball.x, this.ball.y);
         this.ctx.drawImage(this.sprites.platform.img, this.platform.x, this.platform.y);
@@ -106,6 +123,8 @@ const GAME = {
         for (let row = 0; row < level.rows; row++) {
             for (let col = 0; col < level.cols; col++) {
                 this.blocksCoor.push({
+                    width: 84,
+                    height: 29,
                     x: 84 * col,
                     y: 29 * row + this.block.y,
                 });
@@ -121,21 +140,50 @@ const GAME = {
             this.run();
         });
 
+    },
+    random(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
     }
 }
 
 GAME.ball = {
     velocity: 4,
     dy: 0,
+    dx: 0,
+    width: 33,
+    height: 29,
     x: 450,
     y: 571,
     single: true,
     start() {
         this.dy = -this.velocity;
+        // this.dx = GAME.random(-this.velocity, this.velocity);
+    },
+    bumpBlock(block) {
+        this.dy *= -1;
     },
     move() {
         this.y += this.dy;
+        this.x += this.dx;
     },
+    collide(block) {
+        const x = this.x + this.dx;
+        const y = this.y + this.dy;
+        if (x + this.width > block.x &&
+            x < block.x + block.width &&
+            y + this.height > block.y &&
+            y < block.y + block.height) {
+            return true;
+        } else {
+            return false;
+        }
+
+    },
+    bumpPlatform(platform) {
+        this.dy *= -1;
+        const touchX = this.x + this.width / 2;
+        this.dx = this.velocity * platform.getTouchOffset(touchX);
+    }
 
 };
 
@@ -143,6 +191,8 @@ GAME.platform = {
     x: 400,
     y: 600,
     velocity: 6,
+    width: 132,
+    height: 20,
     ball: GAME.ball,
     dx: 0,
     fire() {
@@ -170,11 +220,20 @@ GAME.platform = {
     },
     stop() {
         this.dx = 0;
-    }
+    },
+    getTouchOffset(x) {
+        const diff = (this.x + this.width) - x;
+        const offSet = this.width - diff;
+        const result = 2 * offSet / this.width;
+        return result - 1;
+    },
+
 
 };
 
 GAME.block = {
+    width: 84,
+    height: 29,
     x: 0,
     y: 50,
 };
