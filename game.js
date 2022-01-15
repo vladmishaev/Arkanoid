@@ -184,9 +184,12 @@ GAME.ball = {
 
     },
     bumpPlatform(platform) {
-        this.dy *= -1;
-        const touchX = this.x + this.width / 2;
-        this.dx = this.velocity * platform.getTouchOffset(touchX);
+        if (this.dy > 0) {
+            this.dy = -this.velocity;
+            const touchX = this.x + this.width / 2;
+            this.dx = this.velocity * platform.getTouchOffset(touchX);
+        }
+
     }
 
 };
