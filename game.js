@@ -241,8 +241,15 @@ GAME.platform = {
         }
 
     },
+    checkingEdgeWorld() {
+        const checkLeftSide = this.x + this.dx > 0;
+        const checkRightSide = this.x + this.dx + this.width < GAME.canvas.width;
+
+        return checkLeftSide && checkRightSide;
+
+    },
     move() {
-        if (this.dx) {
+        if (this.dx && this.checkingEdgeWorld()) {
             this.x += this.dx;
             if (this.ball !== null) {
                 this.ball.x += this.dx;
