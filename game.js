@@ -8,6 +8,7 @@ const GAME = {
     ctx: null,
     blocksCoor: [],
     ball: null,
+    gameRun: null,
     platform: null,
     block: null,
     level1: {
@@ -99,11 +100,19 @@ const GAME = {
     },
 
     run() {
-        window.requestAnimationFrame(() => {
-            this.update();
-            this.render();
-            this.run();
-        })
+        if (this.gameRun) {
+            window.requestAnimationFrame(() => {
+                this.update();
+                this.render();
+                this.run();
+            })
+        }
+    },
+
+    stop() {
+        this.gameRun = false;
+        alert('you lost');
+        window.location.reload();
     },
 
     render() {
@@ -138,8 +147,10 @@ const GAME = {
 
     },
 
+
     startGame() {
         this.init();
+        this.gameRun = true;
         this.preload(() => {
             this.createBlocksCoor(this.level1);
             this.run();
@@ -179,7 +190,7 @@ GAME.ball = {
         const ballLeft = x;
         const ballRight = ballLeft + this.width;
         const ballTop = y;
-        const ballBottom = ballTop + this.height;
+
 
         const gameWorldLeft = 0;
         const gameWorldRight = GAME.canvas.width;
@@ -196,8 +207,8 @@ GAME.ball = {
         } else if (ballTop < gameWorldTop) {
             this.y = 0;
             this.dy = this.velocity;
-        } else if (ballBottom > gameWorldBottom) {
-            console.log('game over');
+        } else if (ballTop > gameWorldBottom) {
+            GAME.stop();
         }
 
 
@@ -216,6 +227,9 @@ GAME.ball = {
 
     },
     bumpPlatform(platform) {
+        if (platform.dx) {
+            this.x += platform.dx;
+        }
         if (this.dy > 0) {
             this.dy = -this.velocity;
             const touchX = this.x + this.width / 2;
@@ -241,8 +255,15 @@ GAME.platform = {
         }
 
     },
+    checkingEdgeWorld() {
+        const checkLeftSide = this.x + this.dx > 0;
+        const checkRightSide = this.x + this.dx + this.width < GAME.canvas.width;
+
+        return checkLeftSide && checkRightSide;
+
+    },
     move() {
-        if (this.dx) {
+        if (this.dx && this.checkingEdgeWorld()) {
             this.x += this.dx;
             if (this.ball !== null) {
                 this.ball.x += this.dx;
